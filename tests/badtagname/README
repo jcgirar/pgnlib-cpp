@@ -1,0 +1,1 @@
+A further restriction on tag names is that they are composed exclusively of letters, digits, and the underscore character. This is done to facilitate mapping of tag names into key and attribute names for use with general purpose database programs.

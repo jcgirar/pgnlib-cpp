@@ -1,0 +1,2 @@
+Tag names, like all symbols, are case sensitive.
+A symbol token starts with a letter or digit character and is immediately followed by a sequence of zero or more symbol continuation characters.
