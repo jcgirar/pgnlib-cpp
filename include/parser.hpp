@@ -21,11 +21,12 @@
 #define PGN_PARSER_HPP
 
 #include "ref_object.hpp"
+#include "export_decl.hpp"
 
 namespace pgn
 {
 
-class IParser : public IRefObject
+class PGN_PARSER_API IParser : public IRefObject
 {
 public:
     static IParser* create(char const* pgnfile);

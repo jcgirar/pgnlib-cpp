@@ -17,25 +17,18 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PGN_REF_OBJECT_HPP
-#define PGN_REF_OBJECT_HPP
+#ifndef PGN_EXPORT_DECL_HPP
+#define PGN_EXPORT_DECL_HPP
 
-#include "export_decl.hpp"
+#if defined(_WIN32)
+#ifdef PGN_PARSER_API_EXPORT
+#    define PGN_PARSER_API __declspec(dllexport)
+#else
+#    define PGN_PARSER_API __declspec(dllimport)
+#endif
+#else
+#    define PGN_PARSER_API
+#endif
 
-namespace pgn
-{
-
-class PGN_PARSER_API IRefObject
-{
-public:
-    virtual unsigned addRef() = 0;
-    virtual unsigned release() = 0;
-
-protected:
-    virtual ~IRefObject() {}
-};
-
-} /* namespace pgn */
-
-#endif /* #ifndef PGN_REF_OBJECT_HPP */
+#endif /* #ifndef PGN_EXPORT_DECL_HPP */
 
