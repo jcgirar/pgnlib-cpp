@@ -26,10 +26,85 @@
 namespace pgn
 {
 
+class IMove;
+
+class PGN_PARSER_API IVariation : public IRefObject
+{
+public:
+    virtual char const* getMoveText() const = 0;
+
+    virtual unsigned getMoveCount() const = 0;
+    virtual IMove const* getMove(unsigned n) const = 0;
+};
+
+class PGN_PARSER_API IMove : public IRefObject
+{
+public:
+    virtual char const* getSAN() const = 0;
+    virtual char const* getComment() const = 0;
+    virtual unsigned getMoveNumber() const = 0;
+
+    virtual bool hasAlternativeVariation() const = 0;
+    virtual unsigned getVariationCount() const = 0;
+    virtual IVariation const* getVariation(unsigned n) const = 0;
+};
+
+typedef enum
+{
+    grWhiteWin,
+    grBlackWin,
+    grDraw,
+    grUndefined
+} game_result_t;
+
+class PGN_PARSER_API IGame : public IVariation
+{
+public:
+    /* This is the STR (Seven Tag Roster). The interpretation of these tags
+     * is fixed as is the order in which they appear. Although the definition
+     * and use of additional tag names and semantics is permitted and
+     * encouraged when needed, the STR is the common ground that all programs
+     * should follow for public data interchange. */
+    virtual char const* getTagEvent() const = 0;
+    virtual char const* getTagSite()  const = 0;
+    virtual char const* getTagDate()  const = 0;
+    virtual char const* getTagRound() const = 0;
+    virtual char const* getTagWhite() const = 0;
+    virtual char const* getTagBlack() const = 0;
+    virtual game_result_t getTagResult() const = 0;
+
+    virtual char const* getTagValue(char const* name) const = 0;
+};
+
+typedef enum
+{
+    seIllegalMove,
+    seIllegalToken,
+    seIllegalTagValue,
+    seIllegalTagName,
+    seIllegalTerminationMarker,
+    seUndefinedErrorCode
+} syntax_error_t;
+
+class PGN_PARSER_API IErrorHandler : public IRefObject
+{
+public:
+    virtual bool callback(syntax_error_t code, char const* description,
+        unsigned long long line, unsigned long long column) = 0;
+};
+
+typedef enum
+{
+    rmDefault
+} read_mode_t;
+
 class PGN_PARSER_API IParser : public IRefObject
 {
 public:
     static IParser* create(char const* pgnfile);
+
+    virtual void setErrorHandler(IErrorHandler* handler) = 0;
+    virtual IGame const* readGame(read_mode_t mode = rmDefault) = 0;
 };
 
 } /* namespace pgn */
