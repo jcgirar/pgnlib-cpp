@@ -1,0 +1,16 @@
+[Event "?"]
+[Site "?"]
+[Date "????.??.??"]
+[Round "?"]
+[White "Mister X:Mister Y:Mister Z"]
+[Black "NN"]
+[Result "1-0"]
+[ECO "C57"]
+[WhiteElo "2010"]
+[BlackElo "1620"]
+[PlyCount "17"]
+
+1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6 4.Ng5 d5 5.exd5 Nxd5 6.Nxf7 Kxf7 7.Qf3+ Ke6
+8.Nc3 Ne7 9.O-O c6 10.Re1 Bd7 11.d4 Kd6 12.Rxe5 Ng6 13.Nxd5 Nxe5
+14.dxe5+ Kc5 15.Qa3+ Kxc4 16.Qd3+ Kc5 17.b4# 1-0
+
