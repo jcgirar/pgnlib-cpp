@@ -57,27 +57,58 @@ typedef enum
     grUndefined
 } game_result_t;
 
+/**
+ * The class represents information about a game in pgn-file. A PGN game is
+ * composed of two sections. The first is the tag pair section and the second
+ * is the movetext section. The tag pair section provides information that
+ * identifies the game by defining the values associated with a set of standard
+ * parameters. The movetext section gives the usually enumerated and possibly
+ * annotated moves of the game along with the concluding game termination
+ * marker. The chess moves themselves are represented using SAN (Standard
+ * Algebraic Notation)
+ *
+ * You can get STR (Seven Tag Roster) directly and value of any other tags
+ * using the following methods:
+ *
+ * getTagEvent(), getTagSite(), getTagDate(), getTagRound(), getTagWhite(),
+ * getTagBlack(), getTagResult(), getTagValue().
+ *
+ * The interpretation of STR tags is fixed as is the order in which
+ * they appear. Although the definition and use of additional tag names
+ * and semantics is permitted and encouraged when needed, the STR is
+ * the common ground that all programs should follow for public data
+ * interchange. */
 class PGN_PARSER_API IGame : public IVariation
 {
 public:
-    /* This is the STR (Seven Tag Roster). The interpretation of these tags
-     * is fixed as is the order in which they appear. Although the definition
-     * and use of additional tag names and semantics is permitted and
-     * encouraged when needed, the STR is the common ground that all programs
-     * should follow for public data interchange. */
+    /** Get the name of the tournament or match event. */
     virtual char const* getTagEvent() const = 0;
-    virtual char const* getTagSite()  const = 0;
-    virtual char const* getTagDate()  const = 0;
+    /** Get the location of the event. */
+    virtual char const* getTagSite() const = 0;
+    /** Get the starting date of the game. */
+    virtual char const* getTagDate() const = 0;
+    /** Get the playing round ordinal of the game. */
     virtual char const* getTagRound() const = 0;
+    /** Get the player of the white pieces. */
     virtual char const* getTagWhite() const = 0;
+    /** Get the player of the black pieces. */
     virtual char const* getTagBlack() const = 0;
-    virtual game_result_t getTagResult() const = 0;
+    /** Get the result of the game. */
+    virtual char const* getTagResult() const = 0;
 
+    /**
+     * Get an arbitrary value of tag pair section by tag's name. At the
+     * present moment only string values are supported (any non-string value
+     * will be returned as string). */
     virtual char const* getTagValue(char const* name) const = 0;
+
+    /** Get the result of the game. */
+    virtual game_result_t getResult() const = 0;
 };
 
 typedef enum
 {
+    seValid,
     seIllegalMove,
     seIllegalToken,
     seIllegalTagValue,
@@ -86,25 +117,50 @@ typedef enum
     seUndefinedErrorCode
 } syntax_error_t;
 
-class PGN_PARSER_API IErrorHandler : public IRefObject
+class PGN_PARSER_API IErrorHandlerCallback : public IRefObject
 {
 public:
-    virtual bool callback(syntax_error_t code, char const* description,
-        unsigned long long line, unsigned long long column) = 0;
+    virtual bool operator()(bool isCritical, syntax_error_t code,
+        char const* description, unsigned long long line, unsigned column) = 0;
 };
 
 typedef enum
-{
-    rmDefault
-} read_mode_t;
+{ 
+    cmSimple,
+    cmComplete
+} check_mode_t;
 
 class PGN_PARSER_API IParser : public IRefObject
 {
 public:
-    static IParser* create(char const* pgnfile);
+    static IParser* create(char    const* pgnfile);
+    static IParser* create(wchar_t const* pgnfile);
 
-    virtual void setErrorHandler(IErrorHandler* handler) = 0;
-    virtual IGame const* readGame(read_mode_t mode = rmDefault) = 0;
+    /**
+     * Validate a game.
+     * @param [in] game     game which was returned by read() method.
+     * @param [in] mode     mode of game validation.
+     * @return The method return seValid in case the game is valid. Otherwise
+     * it returns syntax error. In case of deep check the method can call
+     * IErrorHandlerCallback. */
+    static syntax_error_t isGameValid(IGame const* game,
+        check_mode_t mode = cmSimple);
+
+    /**
+     * Set an error handler for getting information about parsing errors and
+     * warnings. If you want to reset previous passed callback just call
+     * setErrorHandler(NULL). */
+    virtual void setErrorHandler(IErrorHandlerCallback* callback) = 0;
+
+    /**
+     * Read N-th game from pgnfile.
+     * @param [in] gameN    number of game (from 1 to N).
+     * @return On success the method returns an instance of IGame which
+     * represents gameN. If there is no game with given number the method
+     * returns NULL. On syntax error IErrorHandlerCallback is called and
+     * dummy instance of IGame is returns. Please use isGameValid() method
+     * for checking return value. */
+    virtual IGame const* read(unsigned gameN) = 0;
 };
 
 } /* namespace pgn */

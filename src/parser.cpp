@@ -27,5 +27,10 @@ IParser* IParser::create(char const* pgnfile)
     return 0;
 }
 
+IParser* IParser::create(wchar_t const* pgnfile)
+{
+    return 0;
+}
+
 } /* namespace pgn */
 
