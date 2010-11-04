@@ -124,43 +124,86 @@ public:
         char const* description, unsigned long long line, unsigned column) = 0;
 };
 
-typedef enum
-{ 
-    cmSimple,
-    cmComplete
-} check_mode_t;
-
+/**
+ * The main interface for parsing PGN files.
+ *
+ * @code Example of using pgn::IParser interface:
+ * boost::intrusive_ptr<pgn::IParser> pgnparser;
+ * pgnparser = pgn::IParser::create("/path/to/pgnfile");
+ *
+ * if ( pgnparser )
+ * {
+ *     pgnparser->setErrorHandler(...);
+ *
+ *     boost::intrusive_ptr<IGame> game;
+ *     while ( (game = pgnparser->read()) != NULL )
+ *     {
+ *         if ( pgn::IParser::isGameValid(game) != pgn::seValid )
+ *         {
+ *             break;
+ *         }
+ *
+ *         ...
+ *     }
+ * }
+ * @endcode */
 class PGN_PARSER_API IParser : public IRefObject
 {
 public:
-    static IParser* create(char    const* pgnfile);
+    /**
+     * Create an instance of IParser (factory method).
+     * @param pgnfile       name of pgn file in utf8 encoding.
+     * @return On success it returns an instance of IParser. Otherwise it
+     * returns NULL. */
+    static IParser* create(char const* pgnfile);
+
+    /**
+     * Create an instance of IParser (factory method).
+     * @param pgnfile       name of pgn file.
+     * @return On success it returns an instance of IParser. Otherwise it
+     * returns NULL. */
     static IParser* create(wchar_t const* pgnfile);
 
     /**
-     * Validate a game.
+     * Validate a game. Usually the method should be called after read() method.
+     * You should always check that parsing is successful and returned game is
+     * valid.
+     *
      * @param [in] game     game which was returned by read() method.
-     * @param [in] mode     mode of game validation.
+     * @param [in] deep     mode of game validation. Deep validation requires
+     * much time (try to find illegal moves and other critical errors in
+     * movetext section of the game). By default, only trivial checks are done.
+     *
      * @return The method return seValid in case the game is valid. Otherwise
      * it returns syntax error. In case of deep check the method can call
      * IErrorHandlerCallback. */
-    static syntax_error_t isGameValid(IGame const* game,
-        check_mode_t mode = cmSimple);
+    static syntax_error_t isGameValid(IGame const* game, bool deep = false);
 
     /**
-     * Set an error handler for getting information about parsing errors and
-     * warnings. If you want to reset previous passed callback just call
-     * setErrorHandler(NULL). */
+     * Set an error handler for getting information about syntax errors and
+     * warnings. If you want to reset callback just call setErrorHandler(NULL).
+     */
     virtual void setErrorHandler(IErrorHandlerCallback* callback) = 0;
 
     /**
-     * Read N-th game from pgnfile.
-     * @param [in] gameN    number of game (from 1 to N).
+     * Read N-th game from pgnfile. There is no method which can return number
+     * of games due to performance reason. The method will parse the file on
+     * demand.
+     *
+     * @param [in] gameN    number of game (from 1 to N). If the parameter is
+     * zero it means to read next game. For first call of the method it means
+     * to read first game. For second call of the method it means to read
+     * second game and so on. If user has called read(N) (with parameter) then
+     * next call without a parameter will be equal to read(N+1).
+     *
      * @return On success the method returns an instance of IGame which
      * represents gameN. If there is no game with given number the method
-     * returns NULL. On syntax error IErrorHandlerCallback is called and
-     * dummy instance of IGame is returns. Please use isGameValid() method
-     * for checking return value. */
-    virtual IGame const* read(unsigned gameN) = 0;
+     * returns NULL.
+     *
+     * Note: On syntax error IErrorHandlerCallback is called and
+     * dummy instance of IGame is returned. Use isGameValid() method for
+     * checking return value. */
+    virtual IGame const* read(unsigned gameN = 0) = 0;
 };
 
 } /* namespace pgn */
