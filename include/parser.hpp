@@ -109,19 +109,36 @@ public:
 typedef enum
 {
     seValid,
-    seIllegalMove,
     seIllegalToken,
     seIllegalTagValue,
     seIllegalTagName,
+    seIllegalMove,
     seIllegalTerminationMarker,
     seUndefinedErrorCode
 } syntax_error_t;
 
+/**
+ * Get notification about syntax errors in pgn-file. User can implement the
+ * interface and register it using IParser::setErrorHandler(...) method. */
 class PGN_PARSER_API IErrorHandlerCallback : public IRefObject
 {
 public:
+    /** 
+     * Notify about a syntax error in pgn-file.
+     * @param [in] isCritical   true in case the error is fatal. In this case
+     *                          pgn-file is corrupted and can be read.
+     * @param [in] code         error code of the syntax error.
+     * @param [in] description  string with description of the syntax error.
+     * @param [in] line         number of line where the syntax error is
+     *                          occurred.
+     * @param [in] column       number of column where the syntax error is
+     *                          occurred.
+     * @return If user want to stop processing of pgn-file false should be
+     * returned. Otherwise the method has to return true. If isCritical is
+     * true than returned value of the method is ignored. */
     virtual bool operator()(bool isCritical, syntax_error_t code,
-        char const* description, unsigned long long line, unsigned column) = 0;
+        wchar_t const* description, unsigned long long line,
+        unsigned column) = 0;
 };
 
 /**
@@ -150,6 +167,9 @@ public:
 class PGN_PARSER_API IParser : public IRefObject
 {
 public:
+    /** Next game constant. It is used in read(...) method. */
+    static const unsigned NEXT_GAME;
+
     /**
      * Create an instance of IParser (factory method).
      * @param pgnfile       name of pgn file in utf8 encoding.
@@ -171,8 +191,9 @@ public:
      *
      * @param [in] game     game which was returned by read() method.
      * @param [in] deep     mode of game validation. Deep validation requires
-     * much time (try to find illegal moves and other critical errors in
-     * movetext section of the game). By default, only trivial checks are done.
+     *                      much time (try to find illegal moves and other
+     *                      critical errors in movetext section of the game).
+     *                      By default, only trivial checks are done.
      *
      * @return The method return seValid in case the game is valid. Otherwise
      * it returns syntax error. In case of deep check the method can call
@@ -182,8 +203,17 @@ public:
     /**
      * Set an error handler for getting information about syntax errors and
      * warnings. If you want to reset callback just call setErrorHandler(NULL).
+     * @param [in] callback is error handler callback.
+     * @param [in] strict   use false value if you want to skip well-known
+     *                      standard violations which can be easily fixed by
+     *                      the parser. Another scenario is to get notification
+     *                      about such problems (strict == true) but returns
+     *                      true from IErrorHandlerCallback::operator(...). In
+     *                      this case parser will fix the problem and continue
+     *                      parsing.
      */
-    virtual void setErrorHandler(IErrorHandlerCallback* callback) = 0;
+    virtual void setErrorHandler(IErrorHandlerCallback* callback,
+        bool strict = false) = 0;
 
     /**
      * Read N-th game from pgnfile. There is no method which can return number
@@ -191,10 +221,12 @@ public:
      * demand.
      *
      * @param [in] gameN    number of game (from 1 to N). If the parameter is
-     * zero it means to read next game. For first call of the method it means
-     * to read first game. For second call of the method it means to read
-     * second game and so on. If user has called read(N) (with parameter) then
-     * next call without a parameter will be equal to read(N+1).
+     *                      zero it means to read next game. For first call of
+     *                      the method it means to read first game. For second
+     *                      call of the method it means to read second game and
+     *                      so on. If user has called read(N) (with parameter)
+     *                      then next call without a parameter will be equal to
+     *                      read(N+1).
      *
      * @return On success the method returns an instance of IGame which
      * represents gameN. If there is no game with given number the method
@@ -203,7 +235,7 @@ public:
      * Note: On syntax error IErrorHandlerCallback is called and
      * dummy instance of IGame is returned. Use isGameValid() method for
      * checking return value. */
-    virtual IGame const* read(unsigned gameN = 0) = 0;
+    virtual IGame const* read(unsigned gameN = NEXT_GAME) = 0;
 };
 
 } /* namespace pgn */

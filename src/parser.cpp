@@ -22,6 +22,8 @@
 namespace pgn
 {
 
+const unsigned IParser::NEXT_GAME = 0;
+
 IParser* IParser::create(char const* pgnfile)
 {
     return 0;
