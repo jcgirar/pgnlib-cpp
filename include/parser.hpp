@@ -333,13 +333,47 @@ typedef enum
 class PGN_PARSER_API IMove
 {
 public:
+    /** Next NAG constant. It is used in getNAG method. */
     static const unsigned NEXT_NAG;
+
+    /**
+     * Convert NAG value to string.
+     * @param [in] nag      numeric annotation glyph.
+     * @param [in] fmt      format of string for NAG representation.
+     * @return The method always returns null-terminated utf8 string which
+     * represents given NAG value. */
     static char const* toString(NAG_t nag, NAG_format_t fmt = nfBrief);
 
+    /**
+     * Get standard algebraic notation for given move.
+     * @return If the move is valid it is valid null-terminated string with
+     * SAN of the move. Otherwise NULL is returned. */
     virtual char const* getSAN() const = 0;
+
+    /** Get set of NAGs for the move.
+     * @param [in] n        number of NAG from 1 till N. Special NEXT_NAG can
+     *                      be used for easy naviation.
+     *
+     * @return List of NAGs. Last elemement of the list is nagNull. If first
+     * element is nagNull also it means the move doesn't contain NAGs. */
     virtual NAG_t getNAG(unsigned n = NEXT_NAG) const = 0;
+
+    /**
+     * Get comment for the move.
+     * @return If the move contains a comment the method returns it. Otherwise
+     * NULL is returned. */
     virtual char const* getComment() const = 0;
+
+    /**
+     * Get number of the move.
+     * @return If the move is valid the method returns its number. Otherwise
+     * invalid number (zero) is returned. */
     virtual unsigned getMoveNumber() const = 0;
+
+    /**
+     * Get variation of the move (MAIN_LINE and so on).
+     * @return If the move is valid the method returns variation number.
+     * Otherwise invalid number (zero) is returned. */
     virtual unsigned getVariationNumber() const = 0;
 
 protected:
@@ -510,7 +544,7 @@ public:
 class PGN_PARSER_API IParser : public IRefObject
 {
 public:
-    /** Next game constant. It is used in read(...) method. */
+    /** Next game constant. It is used in read() method. */
     static const unsigned NEXT_GAME;
 
     /**
