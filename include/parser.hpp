@@ -26,35 +26,351 @@
 namespace pgn
 {
 
-class IMove;
-
-class PGN_PARSER_API IVariation : public IRefObject
-{
-public:
-    virtual char const* getMoveText() const = 0;
-
-    virtual unsigned getMoveCount() const = 0;
-    virtual IMove const* getMove(unsigned n) const = 0;
-};
-
-class PGN_PARSER_API IMove : public IRefObject
-{
-public:
-    virtual char const* getSAN() const = 0;
-    virtual char const* getComment() const = 0;
-    virtual unsigned getMoveNumber() const = 0;
-
-    virtual bool hasAlternativeVariation() const = 0;
-    virtual unsigned getVariationCount() const = 0;
-    virtual IVariation const* getVariation(unsigned n) const = 0;
-};
-
+/**
+ * Numeric Annotation Glyphs.
+ * NAG zero is used for a null annotation; it is provided for the convenience
+ * of software designers as a placeholder value and should probably not be
+ * used in external PGN data.
+ * NAGs with values from 1 to 9 annotate the move just played.
+ * NAGs with values from 10 to 135 modify the current position.  
+ * NAGs with values from 136 to 139 describe time pressure.  
+ * Other NAG values are reserved for future definition. */
 typedef enum
 {
-    grWhiteWin,
-    grBlackWin,
-    grDraw,
-    grUndefined
+    /** null annotation */
+    nagNull,
+    /** good move (traditional "!") */
+    nagGoodMove,
+    /** poor move (traditional "?") */
+    nagPoorMove,
+    /** very good move (traditional "!!") */
+    nagVeryGoodMove,
+    /** very poor move (traditional "??") */
+    nagVeryPoorMove,
+    /** speculative move (traditional "!?") */
+    nagSpeculativeMove,
+    /** questionable move (traditional "?!") */
+    nagQuestionableMove,
+    /** forced move (all others lose quickly) */
+    nagForcedMove,
+    /** singular move (no reasonable alternatives) */
+    nagSingularMove,
+    /** worst move */
+    nagWorstMove,
+    /** drawish position */
+    nagDrawishPosition,
+    /** equal chances, quiet position */
+    nagEqualChancesQuietPosition,
+    /** equal chances, active position */
+    nagEqualChancesActivePosition,
+    /** unclear position */
+    nagUnclearPosition,
+    /** White has a slight advantage */
+    nagWhiteSlightAdvantage,
+    /** Black has a slight advantage */
+    nagBlackSlightAdvantage,
+    /** White has a moderate advantage */
+    nagWhiteModerateAdvantage,
+    /** Black has a moderate advantage */
+    nagBlackModerateAdvantage,
+    /** White has a decisive advantage */
+    nagWriteDecisiveAdvantage,
+    /** Black has a decisive advantage */
+    nagBlackDecisiveAdvantage,
+    /** White has a crushing advantage (Black should resign) */
+    nagWhiteCrushingAdvantage,
+    /** Black has a crushing advantage (White should resign) */
+    nagBlackCrushingAdvantage,
+    /** White is in zugzwang */
+    nagWhiteInZugzwang,
+    /** Black is in zugzwang */
+    nagBlackInZugzwang,
+    /** White has a slight space advantage */
+    nagWhiteSlightSpaceAdvantage,
+    /** Black has a slight space advantage */
+    nagBlackSlightSpaceAdvantage,
+    /** White has a moderate space advantage */
+    nagWhiteModerateSpaceAdvantage,
+    /** Black has a moderate space advantage */
+    nagBlackModerateSpaceAdvantage,
+    /** White has a decisive space advantage */
+    nagWhiteDecisiveSpaceAdvantage,
+    /** Black has a decisive space advantage */
+    nagBlackDecisiveSpaceAdvantage,
+    /** White has a slight time (development) advantage */
+    nagWhiteSlightDevelopmentAdvantage,
+    /** Black has a slight time (development) advantage */
+    nagBlackSlightDevelopmentAdvantage,
+    /** White has a moderate time (development) advantage */
+    nagWhiteModerateDevelopmentAdvantage,
+    /** Black has a moderate time (development) advantage */
+    nagBlackModerateDevelopmentAdvantage,
+    /** White has a decisive time (development) advantage */
+    nagWhiteDecisiveDevelopmentAdvantage,
+    /** Black has a decisive time (development) advantage */
+    nagBlackDecisiveDevelopmentAdvantage,
+    /** White has the initiative */
+    nagWhiteInitiative,
+    /** Black has the initiative */
+    nagBlackInitiative,
+    /** White has a lasting initiative */
+    nagWhiteLastingInitiative,
+    /** Black has a lasting initiative */
+    nagBlackLastingInitiative,
+    /** White has the attack */
+    nagWhiteAttack,
+    /** Black has the attack */
+    nagBlackAttack,
+    /** White has insufficient compensation for material deficit */
+    nagWhiteInsufficientCompensation,
+    /** Black has insufficient compensation for material deficit */
+    nagBlackInsufficientCompensation,
+    /** White has sufficient compensation for material deficit */
+    nagWhiteSufficientCompensation,
+    /** Black has sufficient compensation for material deficit */
+    nagBlackSufficientCompensation,
+    /** White has more than adequate compensation for material deficit */
+    nagWhiteMoreThanAdequateCompensation,
+    /** Black has more than adequate compensation for material deficit */
+    nagBlackMoreThanAdequateCompensation,
+    /** White has a slight center control advantage */
+    nagWhiteSlightCenterControlAdvantage,
+    /** Black has a slight center control advantage */
+    nagBlackSlightCenterControlAdvantage,
+    /** White has a moderate center control advantage */
+    nagWhiteModerateCenterControlAdvantage,
+    /** Black has a moderate center control advantage */
+    nagBlackModerateCenterControlAdvantage,
+    /** White has a decisive center control advantage */
+    nagWhiteDecisiveCenterControlAdvantage,
+    /** Black has a decisive center control advantage */
+    nagBlackDecisiveCenterControlAdvantage,
+    /** White has a slight kingside control advantage */
+    nagWhiteSlightKingsideControlAdvantage,
+    /** Black has a slight kingside control advantage */
+    nagBlackSlightKingsideControlAdvantage,
+    /** White has a moderate kingside control advantage */
+    nagWhiteModerateKingsideControlAdvantage,
+    /** Black has a moderate kingside control advantage */
+    nagBlackModerateKingsideControlAdvantage,
+    /** White has a decisive kingside control advantage */
+    nagWhiteDecisiveKingsideControlAdvantage,
+    /** Black has a decisive kingside control advantage */
+    nagBlackDecisiveKingsideControlAdvantage,
+    /** White has a slight queenside control advantage */
+    nagWhiteSlightQeensideControlAdvantage,
+    /** Black has a slight queenside control advantage */
+    nagBlackSlightQeensideControlAdvantage,
+    /** White has a moderate queenside control advantage */
+    nagWhiteModerateQeensideControlAdvantage,
+    /** Black has a moderate queenside control advantage */
+    nagBlackModerateQeensideControlAdvantage,
+    /** White has a decisive queenside control advantage */
+    nagWhiteDecisiveQeensideControlAdvantage,
+    /** Black has a decisive queenside control advantage */
+    nagBlackDecisiveQeensideControlAdvantage,
+    /** White has a vulnerable first rank */
+    nagWhiteVulnerableFirstRank,
+    /** Black has a vulnerable first rank */
+    nagBlackVulnerableFirstRank,
+    /** White has a well protected first rank */
+    nagWhiteWellProtectedFirstRank,
+    /** Black has a well protected first rank */
+    nagBlackWellProtectedFirstRank,
+    /** White has a poorly protected king */
+    nagWhitePoorlyProtectedKing,
+    /** Black has a poorly protected king */
+    nagBlackPoorlyProtectedKing,
+    /** White has a well protected king */
+    nagWhiteWellProtectedKing,
+    /** Black has a well protected king */
+    nagBlackWellProtectedKing,
+    /** White has a poorly placed king */
+    nagWhitePoorlyPlacedKing,
+    /** Black has a poorly placed king */
+    nagBlackPoorlyPlacedKing,
+    /** White has a well placed king */
+    nagWhiteWellPlacedKing,
+    /** Black has a well placed king */
+    nagBlackWellPlacedKing,
+    /** White has a very weak pawn structure */
+    nagWhiteVeryWeakPawnStructure,
+    /** Black has a very weak pawn structure */
+    nagBlackVeryWeakPawnStructure,
+    /** White has a moderately weak pawn structure */
+    nagWhiteModeratelyWeakPawnStructure,
+    /** Black has a moderately weak pawn structure */
+    nagBlackModeratelyWeakPawnStructure,
+    /** White has a moderately strong pawn structure */
+    nagWhiteModeratelyStrongPawnStructure,
+    /** Black has a moderately strong pawn structure */
+    nagBlackModeratelyStrongPawnStructure,
+    /** White has a very strong pawn structure */
+    nagWhiteVeryStrongPawnStructure,
+    /** Black has a very strong pawn structure */
+    nagBlackVeryStrongPawnStructure,
+    /** White has poor knight placement */
+    nagWhitePoorKnightPlacement,
+    /** Black has poor knight placement */
+    nagBlackPoorKnightPlacement,
+    /** White has good knight placement */
+    nagWhiteGoodKnightPlacement,
+    /** Black has good knight placement */
+    nagBlackGoodKnightPlacement,
+    /** White has poor bishop placement */
+    nagWhitePoorBishopPlacement,
+    /** Black has poor bishop placement */
+    nagBlackPoorBishopPlacement,
+    /** White has good bishop placement */
+    nagWhiteGoodBishopPlacement,
+    /** Black has good bishop placement */
+    nagBlackGoodBishopPlacement,
+    /** White has poor rook placement */
+    nagWhitePoorRookPlacement,
+    /** Black has poor rook placement */
+    nagBlackPoorRookPlacement,
+    /** White has good rook placement */
+    nagWhiteGoodRookPlacement,
+    /** Black has good rook placement */
+    nagBlackGoodRookPlacement,
+    /** White has poor queen placement */
+    nagWhitePoorQueenPlacement,
+    /** Black has poor queen placement */
+    nagBlackPoorQueenPlacement,
+    /** White has good queen placement */
+    nagWhiteGoodQueenPlacement,
+    /** Black has good queen placement */
+    nagBlackGoodQueenPlacement,
+    /** White has poor piece coordination */
+    nagWhitePoorPieceCoordination,
+    /** Black has poor piece coordination */
+    nagBlackPoorPieceCoordination,
+    /** White has good piece coordination */
+    nagWhiteGoodPieceCoordination,
+    /** Black has good piece coordination */
+    nagBlackGoodPieceCoordination,
+    /** White has played the opening very poorly */
+    nagWhiteOpeningVeryPoorly,
+    /** Black has played the opening very poorly */
+    nagBlackOpeningVeryPoorly,
+    /** White has played the opening poorly */
+    nagWhiteOpeningPoorly,
+    /** Black has played the opening poorly */
+    nagBlackOpeningPoorly,
+    /** White has played the opening well */
+    nagWhiteOpeningWell,
+    /** Black has played the opening well */
+    nagBlackOpeningWell,
+    /** White has played the opening very well */
+    nagWhiteOpeningVeryWell,
+    /** Black has played the opening very well */
+    nagBlackOpeningVeryWell,
+    /** White has played the middlegame very poorly */
+    nagWhiteMiddlegameVeryPoorly,
+    /** Black has played the middlegame very poorly */
+    nagBlackMiddlegameVeryPoorly,
+    /** White has played the middlegame poorly */
+    nagWhiteMiddlegamePoorly,
+    /** Black has played the middlegame poorly */
+    nagBlackMiddlegamePoorly,
+    /** White has played the middlegame well */
+    nagWhiteMiddlegameWell,
+    /** Black has played the middlegame well */
+    nagBlackMiddlegameWell,
+    /** White has played the middlegame very well */
+    nagWhiteMiddlegameVeryWell,
+    /** Black has played the middlegame very well */
+    nagBlackMiddlegameVeryWell,
+    /** White has played the ending very poorly */
+    nagWhiteEndingVeryPoorly,
+    /** Black has played the ending very poorly */
+    nagBlackEndingVeryPoorly,
+    /** White has played the ending poorly */
+    nagWhiteEndingPoorly,
+    /** Black has played the ending poorly */
+    nagBlackEndingPoorly,
+    /** White has played the ending well */
+    nagWhiteEndingWell,
+    /** Black has played the ending well */
+    nagBlackEndingWell,
+    /** White has played the ending very well */
+    nagWhiteEndingVeryWell,
+    /** Black has played the ending very well */
+    nagBlackEndingVeryWell,
+    /** White has slight counterplay */
+    nagWhiteSlightCounterplay,
+    /** Black has slight counterplay */
+    nagBlackSlightCounterplay,
+    /** White has moderate counterplay */
+    nagWhiteModerateCounterplay,
+    /** Black has moderate counterplay */
+    nagBlackModerateCounterplay,
+    /** White has decisive counterplay */
+    nagWhiteDecisiveCounterplay,
+    /** Black has decisive counterplay */
+    nagBlackDecisiveCounterplay,
+    /** White has moderate time control pressure */
+    nagWriteModerateTimeControlPressure,
+    /** Black has moderate time control pressure */
+    nagBlackModereteTimeControlPressure,
+    /** White has severe time control pressure */
+    nagWriteSevereTimeControlPressure,
+    /** Black has severe time control pressure */
+    nagBlackSevereTimeControlPressure,
+    /** It is last numeric annotation glyph */
+    nagLastNumericAnnotationGlyph
+} NAG_t;
+
+/** Different formats of NAG representation. */
+typedef enum
+{
+    nfNumeric,  /**< $1, $2 and so on. */
+    nfBrief,    /**< ?, !!, and so on. In case brief description is absent
+                     nfDetailed is used. */
+    nfDetailed  /**< Detailed description for given NAG. */
+} NAG_format_t;
+
+class PGN_PARSER_API IMove
+{
+public:
+    static const unsigned NEXT_NAG;
+    static char const* toString(NAG_t nag, NAG_format_t fmt = nfBrief);
+
+    virtual char const* getSAN() const = 0;
+    virtual NAG_t getNAG(unsigned n = NEXT_NAG) const = 0;
+    virtual char const* getComment() const = 0;
+    virtual unsigned getMoveNumber() const = 0;
+    virtual unsigned getVariationNumber() const = 0;
+
+protected:
+    virtual ~IMove() {}
+};
+
+/**
+ * Set of possible syntax errors which can be recognized by pgn::IParser. In
+ * case of a syntax error can not be described using any meaningful error
+ * code than seUndefinedErrorCode will be used. */
+typedef enum
+{
+    seValid,
+    seIllegalToken,
+    seIllegalTagValue,
+    seIllegalTagName,
+    seIllegalMove,
+    seIllegalTerminationMarker,
+    seUndefinedErrorCode
+} syntax_error_t;
+
+/**
+ * Set of possible game results. Basically game result is determined based on
+ * termination marker. In case it doesn't present or wrong result tag will be
+ * used for the purpose. */
+typedef enum
+{
+    grWhiteWin,                                 /**< 1-0 */
+    grBlackWin,                                 /**< 0-1 */
+    grDraw,                                     /**< 1/2-1/2 */
+    grUndefined                                 /**< * */
 } game_result_t;
 
 /**
@@ -78,9 +394,25 @@ typedef enum
  * and semantics is permitted and encouraged when needed, the STR is
  * the common ground that all programs should follow for public data
  * interchange. */
-class PGN_PARSER_API IGame : public IVariation
+class PGN_PARSER_API IGame
 {
 public:
+    static const unsigned MAIN_LINE; /**< main line variation */
+
+    /**
+     * Validate the move. Usually the method should be called after getMove()
+     * method. You should always check that parsing is successful and returned
+     * move is valid.
+     *
+     * @param [in] move     move which was returned by getMove() method.
+     *
+     * @return The method return seValid in case the move is valid. Otherwise
+     * it returns syntax error. */
+    static syntax_error_t isMoveValid(IMove const* move);
+
+    /** Get number of the game. */
+    virtual unsigned getSequenceNumber() const = 0;
+
     /** Get the name of the tournament or match event. */
     virtual char const* getTagEvent() const = 0;
     /** Get the location of the event. */
@@ -104,18 +436,29 @@ public:
 
     /** Get the result of the game. */
     virtual game_result_t getResult() const = 0;
-};
 
-typedef enum
-{
-    seValid,
-    seIllegalToken,
-    seIllegalTagValue,
-    seIllegalTagName,
-    seIllegalMove,
-    seIllegalTerminationMarker,
-    seUndefinedErrorCode
-} syntax_error_t;
+    /** Get movetext section without termination marker. */
+    virtual char const* getMoveText() const = 0;
+
+    /**
+     * Naviate by movetext section.
+     * @param [in] n    number of move from 1 till N.
+     * @param [in] v    number of variation from MAIN_LINE till MAIN_LINE + L.
+     *
+     * @return On success the method returns an instance of IMove which
+     * represents n-th move. If there is no move or variation with given
+     * number the method returns NULL. Returned object is valid till next
+     * call of the method in the same thread. It means that IGame is owner
+     * of the object.
+     *
+     * Note: On syntax error IErrorHandlerCallback is called and
+     * dummy instance of IMove is returned. Use isMoveValid() method for
+     * checking return value. */
+    virtual IMove const* getMove(unsigned n, unsigned v = MAIN_LINE) const = 0;
+
+protected:
+    virtual ~IGame() {}
+};
 
 /**
  * Get notification about syntax errors in pgn-file. User can implement the
@@ -152,7 +495,7 @@ public:
  * {
  *     pgnparser->setErrorHandler(...);
  *
- *     boost::intrusive_ptr<IGame> game;
+ *     IGame const* game;
  *     while ( (game = pgnparser->read()) != NULL )
  *     {
  *         if ( pgn::IParser::isGameValid(game) != pgn::seValid )
@@ -221,7 +564,7 @@ public:
      * demand.
      *
      * @param [in] gameN    number of game (from 1 to N). If the parameter is
-     *                      zero it means to read next game. For first call of
+     *                      NEXT_GAME then to read next game. For first call of
      *                      the method it means to read first game. For second
      *                      call of the method it means to read second game and
      *                      so on. If user has called read(N) (with parameter)
@@ -230,7 +573,8 @@ public:
      *
      * @return On success the method returns an instance of IGame which
      * represents gameN. If there is no game with given number the method
-     * returns NULL.
+     * returns NULL. Returned object is valid till next call of the method
+     * in the same thread. It means that IParser is owner of the object.
      *
      * Note: On syntax error IErrorHandlerCallback is called and
      * dummy instance of IGame is returned. Use isGameValid() method for
