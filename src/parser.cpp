@@ -18,11 +18,15 @@
  */
 
 #include "parser.hpp"
+#include <cstdlib>
 
 namespace pgn
 {
 
-const unsigned IParser::NEXT_GAME = 0;
+const variation_t MAIN_LINE = 0;
+const variation_t NULL_VARIATION = 0;
+const tag_pair_t  NULL_TAG_PAIR = { NULL, NULL };
+const unsigned NEXT_ITEM = 0;
 
 IParser* IParser::create(char const* pgnfile)
 {

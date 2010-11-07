@@ -330,12 +330,15 @@ typedef enum
     nfDetailed  /**< Detailed description for given NAG. */
 } NAG_format_t;
 
+/** The type describes an idetifier of variation. */
+typedef unsigned variation_t;
+extern const variation_t MAIN_LINE; /**< main line variation */
+extern const variation_t NULL_VARIATION;
+extern const unsigned NEXT_ITEM;
+
 class PGN_PARSER_API IMove
 {
 public:
-    /** Next NAG constant. It is used in getNAG method. */
-    static const unsigned NEXT_NAG;
-
     /**
      * Convert NAG value to string.
      * @param [in] nag      numeric annotation glyph.
@@ -351,12 +354,12 @@ public:
     virtual char const* getSAN() const = 0;
 
     /** Get set of NAGs for the move.
-     * @param [in] n        number of NAG from 1 till N. Special NEXT_NAG can
+     * @param [in] n        number of NAG from 1 till N. Special NEXT_ITEM can
      *                      be used for easy naviation.
      *
      * @return List of NAGs. Last elemement of the list is nagNull. If first
      * element is nagNull also it means the move doesn't contain NAGs. */
-    virtual NAG_t getNAG(unsigned n = NEXT_NAG) const = 0;
+    virtual NAG_t getNAG(unsigned n = NEXT_ITEM) const = 0;
 
     /**
      * Get comment for the move.
@@ -374,7 +377,7 @@ public:
      * Get variation of the move (MAIN_LINE and so on).
      * @return If the move is valid the method returns variation number.
      * Otherwise invalid number (zero) is returned. */
-    virtual unsigned getVariationNumber() const = 0;
+    virtual variation_t getVariation() const = 0;
 
 protected:
     virtual ~IMove() {}
@@ -408,6 +411,21 @@ typedef enum
 } game_result_t;
 
 /**
+ * A tag pair is composed of four consecutive tokens: a left bracket token,
+ * a symbol token, a string token, and a right bracket token. The symbol token
+ * is the tag name and the string token is the tag value associated with the
+ * tag name. (There is a standard set of tag names and semantics described
+ * below.) The same tag name should not appear more than once in a tag pair
+ * section. */
+typedef struct
+{
+    char const* name;                           /**< name of the tag */
+    char const* value;                          /**< value of the tag */
+} tag_pair_t;
+
+extern const tag_pair_t NULL_TAG_PAIR;
+
+/**
  * The class represents information about a game in pgn-file. A PGN game is
  * composed of two sections. The first is the tag pair section and the second
  * is the movetext section. The tag pair section provides information that
@@ -431,8 +449,6 @@ typedef enum
 class PGN_PARSER_API IGame
 {
 public:
-    static const unsigned MAIN_LINE; /**< main line variation */
-
     /**
      * Validate the move. Usually the method should be called after getMove()
      * method. You should always check that parsing is successful and returned
@@ -444,40 +460,89 @@ public:
      * it returns syntax error. */
     static syntax_error_t isMoveValid(IMove const* move);
 
-    /** Get number of the game. */
+    /**
+     * Get number of the game. Using the number you can get the game again
+     * with help of readGame() method.
+     * @return Sequence number of the game. */
     virtual unsigned getSequenceNumber() const = 0;
 
-    /** Get the name of the tournament or match event. */
+    /**
+     * Get the name of the tournament or match event.
+     * @return Null-terminated string which contains value of "Event" tag. */
     virtual char const* getTagEvent() const = 0;
-    /** Get the location of the event. */
+
+    /**
+     * Get the location of the event.
+     * @return Null-terminated string which contains value of "Site" tag. */
     virtual char const* getTagSite() const = 0;
-    /** Get the starting date of the game. */
+
+    /**
+     * Get the starting date of the game.
+     * @return Null-terminated string which contains value of "Date" tag. */
     virtual char const* getTagDate() const = 0;
-    /** Get the playing round ordinal of the game. */
+
+    /**
+     * Get the playing round ordinal of the game.
+     * @return Null-terminated string which contains value of "Round" tag. */
     virtual char const* getTagRound() const = 0;
-    /** Get the player of the white pieces. */
+
+    /**
+     * Get the player of the white pieces.
+     * @return Null-terminated string which contains value of "White" tag. */
     virtual char const* getTagWhite() const = 0;
-    /** Get the player of the black pieces. */
+
+    /**
+     * Get the player of the black pieces.
+     * @return Null-terminated string which contains value of "Black" tag. */
     virtual char const* getTagBlack() const = 0;
-    /** Get the result of the game. */
+
+    /**
+     * Get the result of the game.
+     * @return Null-terminated string which contains value of "Result" tag. */
     virtual char const* getTagResult() const = 0;
 
     /**
      * Get an arbitrary value of tag pair section by tag's name. At the
      * present moment only string values are supported (any non-string value
-     * will be returned as string). */
+     * will be returned as string).
+     * @return Null-terminated string which contains tag value. */
     virtual char const* getTagValue(char const* name) const = 0;
 
-    /** Get the result of the game. */
+    /**
+     * Get number of tag pairs in tag pair section.
+     * @return Number of tag pairs. */
+    virtual unsigned getTagPairCount() const = 0;
+
+    /**
+     * Iterate through tag pairs.
+     * @param [in] n    number of a tag pair. You can use special NEXT_ITEM
+     *                  value for getting tag pair one by one.
+     *
+     * @return On success a tag pair is returned. Otherwise NULL_TAG_PAIR
+     * is returned. */
+    virtual tag_pair_t getTagPair(unsigned n = NEXT_ITEM) const = 0;
+
+    /**
+     * Get the result of the game. Each chess game can have one of the
+     * following results: "1-0" (White wins), "0-1" (Black wins), "1/2-1/2"
+     * (drawn game), and "*" (game in progress, result unknown, or game
+     * abandoned).
+     * @return Result of the game. */
     virtual game_result_t getResult() const = 0;
 
-    /** Get movetext section without termination marker. */
+    /**
+     * Get movetext section without termination marker.
+     * @return Null-terminated string which contains movetext section. */
     virtual char const* getMoveText() const = 0;
 
     /**
      * Naviate by movetext section.
      * @param [in] n    number of move from 1 till N.
-     * @param [in] v    number of variation from MAIN_LINE till MAIN_LINE + L.
+     * @param [in] v    identifier of variation from MAIN_LINE till
+     *                  MAIN_LINE + L. What is L here? You can think that a
+     *                  game with RAV (Recursive Annotation Variation) is a
+     *                  complex tree. Number of all leaves is L. You can get
+     *                  the number using getVariationCount() method.
      *
      * @return On success the method returns an instance of IMove which
      * represents n-th move. If there is no move or variation with given
@@ -488,7 +553,48 @@ public:
      * Note: On syntax error IErrorHandlerCallback is called and
      * dummy instance of IMove is returned. Use isMoveValid() method for
      * checking return value. */
-    virtual IMove const* getMove(unsigned n, unsigned v = MAIN_LINE) const = 0;
+    virtual IMove const* getMove(unsigned n,
+        variation_t v = MAIN_LINE) const = 0;
+
+    /**
+     * Get number of moves for given variation. Calling the method will
+     * lead to parsing movetext section (if it has not been parsed yet).
+     * @param [in] v    identifier of a variation.
+     *
+     * @return Number of moves for given variation. */
+    virtual unsigned getMoveNumber(variation_t v) const = 0;
+
+    /**
+     * Get number of variation in the game (number of leaves in game tree).
+     * Calling the method will lead to parsing movetext section (if it has
+     * not been parsed yet) fully.
+     * @return Number of variation in the game.*/
+    virtual unsigned getVariationCount() const = 0;
+
+    /**
+     * Get number of variations for given move. In game tree these will be child
+     * variations (IMove::getVariation() is parent variation). Calling the
+     * method will lead to parsing movetext section (if it has not been parsed
+     * yet).
+     * @param [in] move     a move in a variation of the game.
+     *
+     * @return Number of variations for given move. */
+    virtual unsigned getVariationCount(IMove const* move) const = 0;
+
+    /**
+     * Get all variations which are connected with given move.
+     * Each move can contain several alternative variations. Using the method
+     * you can get all identifiers. It isn't efficient to use only getMove
+     * method for building game tree. You can think that using the method
+     * you get all child variations for give move.
+     *
+     * @param [in] move     move which was get from getMove method.
+     * @param [in] n        number of variation for given move from 1 till
+     *                      N where N is number of variations.
+     * @return On success it returns an idetifier of a variant. Otherwise
+     * NULL_VARIATION is returned. */
+    virtual variation_t getVariation(IMove const* move,
+        unsigned n = NEXT_ITEM) const = 0;
 
 protected:
     virtual ~IGame() {}
@@ -530,7 +636,7 @@ public:
  *     pgnparser->setErrorHandler(...);
  *
  *     IGame const* game;
- *     while ( (game = pgnparser->read()) != NULL )
+ *     while ( (game = pgnparser->readGame()) != NULL )
  *     {
  *         if ( pgn::IParser::isGameValid(game) != pgn::seValid )
  *         {
@@ -544,9 +650,6 @@ public:
 class PGN_PARSER_API IParser : public IRefObject
 {
 public:
-    /** Next game constant. It is used in read() method. */
-    static const unsigned NEXT_GAME;
-
     /**
      * Create an instance of IParser (factory method).
      * @param pgnfile       name of pgn file in utf8 encoding.
@@ -562,11 +665,11 @@ public:
     static IParser* create(wchar_t const* pgnfile);
 
     /**
-     * Validate a game. Usually the method should be called after read() method.
-     * You should always check that parsing is successful and returned game is
-     * valid.
+     * Validate a game. Usually the method should be called after readGame()
+     * method. You should always check that parsing is successful and returned
+     * game is valid.
      *
-     * @param [in] game     game which was returned by read() method.
+     * @param [in] game     game which was returned by readGame() method.
      * @param [in] deep     mode of game validation. Deep validation requires
      *                      much time (try to find illegal moves and other
      *                      critical errors in movetext section of the game).
@@ -593,17 +696,29 @@ public:
         bool strict = false) = 0;
 
     /**
+     * Get number of games. You should understand that whole PGN file will be
+     * read on the call (if it has not read yet). If you need to iterate game
+     * by game then avoid calling of the method. In any case only lightweight
+     * parsing will be done.
+     *
+     * @return Number of games in the PGN file.
+     *
+     * Note: On syntax error IErrorHandlerCallback is called and number of
+     * parsed games are returned. */
+    virtual unsigned getGameCount() const = 0;
+
+    /**
      * Read N-th game from pgnfile. There is no method which can return number
      * of games due to performance reason. The method will parse the file on
      * demand.
      *
      * @param [in] gameN    number of game (from 1 to N). If the parameter is
-     *                      NEXT_GAME then to read next game. For first call of
+     *                      NEXT_ITEM then to read next game. For first call of
      *                      the method it means to read first game. For second
      *                      call of the method it means to read second game and
-     *                      so on. If user has called read(N) (with parameter)
-     *                      then next call without a parameter will be equal to
-     *                      read(N+1).
+     *                      so on. If user has called readGame(N) (with
+     *                      parameter) then next call without a parameter will
+     *                      be equal to readGame(N+1).
      *
      * @return On success the method returns an instance of IGame which
      * represents gameN. If there is no game with given number the method
@@ -613,7 +728,7 @@ public:
      * Note: On syntax error IErrorHandlerCallback is called and
      * dummy instance of IGame is returned. Use isGameValid() method for
      * checking return value. */
-    virtual IGame const* read(unsigned gameN = NEXT_GAME) = 0;
+    virtual IGame const* readGame(unsigned gameN = NEXT_ITEM) = 0;
 };
 
 } /* namespace pgn */
