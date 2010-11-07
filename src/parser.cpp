@@ -18,6 +18,7 @@
  */
 
 #include "parser.hpp"
+#include "game.hpp"
 #include <cstdlib>
 
 namespace pgn
