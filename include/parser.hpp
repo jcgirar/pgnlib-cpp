@@ -78,17 +78,31 @@ class PGN_PARSER_API IParser : public IRefObject
 public:
     /**
      * Create an instance of IParser (factory method).
-     * @param pgnfile       name of pgn file in utf8 encoding.
+     * @param [in] pgnfile  name of pgn file in utf8 encoding.
+     * @param [in] isStrict use false value if you want to skip well-known
+     *                      standard violations which can be easily fixed by
+     *                      the parser. Another scenario is to get notification
+     *                      about such problems (strict == true) but returns
+     *                      true from IErrorHandlerCallback::operator(...). In
+     *                      this case parser will fix the problem and continue
+     *                      parsing.
      * @return On success it returns an instance of IParser. Otherwise it
      * returns NULL. */
-    static IParser* create(char const* pgnfile);
+    static IParser* create(char const* pgnfile, bool isStrict = false);
 
     /**
      * Create an instance of IParser (factory method).
-     * @param pgnfile       name of pgn file.
+     * @param [in] pgnfile  name of pgn file.
+     * @param [in] isStrict use false value if you want to skip well-known
+     *                      standard violations which can be easily fixed by
+     *                      the parser. Another scenario is to get notification
+     *                      about such problems (strict == true) but returns
+     *                      true from IErrorHandlerCallback::operator(...). In
+     *                      this case parser will fix the problem and continue
+     *                      parsing.
      * @return On success it returns an instance of IParser. Otherwise it
      * returns NULL. */
-    static IParser* create(wchar_t const* pgnfile);
+    static IParser* create(wchar_t const* pgnfile, bool isStrict = false);
 
     /**
      * Validate a game. Usually the method should be called after readGame()
@@ -109,17 +123,8 @@ public:
     /**
      * Set an error handler for getting information about syntax errors and
      * warnings. If you want to reset callback just call setErrorHandler(NULL).
-     * @param [in] callback is error handler callback.
-     * @param [in] strict   use false value if you want to skip well-known
-     *                      standard violations which can be easily fixed by
-     *                      the parser. Another scenario is to get notification
-     *                      about such problems (strict == true) but returns
-     *                      true from IErrorHandlerCallback::operator(...). In
-     *                      this case parser will fix the problem and continue
-     *                      parsing.
-     */
-    virtual void setErrorHandler(IErrorHandlerCallback* callback,
-        bool strict = false) = 0;
+     * @param [in] callback is error handler callback. */
+    virtual void setErrorHandler(IErrorHandlerCallback* callback) = 0;
 
     /**
      * Get number of games. You should understand that whole PGN file will be

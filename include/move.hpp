@@ -25,8 +25,7 @@
 namespace pgn
 {
 
-/**
- * Numeric Annotation Glyphs.
+/** Numeric Annotation Glyphs. {{{
  * NAG zero is used for a null annotation; it is provided for the convenience
  * of software designers as a placeholder value and should probably not be
  * used in external PGN data.
@@ -318,7 +317,7 @@ typedef enum
     nagBlackSevereTimeControlPressure,
     /** It is last numeric annotation glyph */
     nagLastNumericAnnotationGlyph
-} NAG_t;
+} NAG_t; /* }}} */
 
 /** Different formats of NAG representation. */
 typedef enum

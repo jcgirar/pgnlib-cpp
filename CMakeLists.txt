@@ -7,3 +7,4 @@ set(PGN_PARSER_VERSION_PATCH 0)
 
 include_directories(./include)
 add_subdirectory(src)
+add_subdirectory(tools)

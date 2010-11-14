@@ -17,27 +17,14 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser.hpp"
-#include "game.hpp"
 #include <cstdlib>
 
-namespace pgn
+#ifdef _WIN32
+int wmain(int argc, wchar_t argv[])
+#else
+int main(int argc, char* argv[])
+#endif
 {
-
-const variation_t MAIN_LINE = 0;
-const variation_t NULL_VARIATION = 0;
-const tag_pair_t  NULL_TAG_PAIR = { NULL, NULL };
-const unsigned NEXT_ITEM = 0;
-
-IParser* IParser::create(char const* pgnfile)
-{
-    return 0;
+    return EXIT_SUCCESS;
 }
-
-IParser* IParser::create(wchar_t const* pgnfile)
-{
-    return 0;
-}
-
-} /* namespace pgn */
 
