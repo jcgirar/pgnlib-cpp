@@ -17,14 +17,40 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <pgn/parser.hpp>
+
 #include <cstdlib>
+#include <iostream>
+#include <boost/intrusive_ptr.hpp>
 
 #ifdef _WIN32
+#define ucerr wcerr
+#define _U(X) L##X
 int wmain(int argc, wchar_t* argv[])
 #else
+#define ucerr cerr
+#define _U(X) X
 int main(int argc, char* argv[])
 #endif
 {
+    if ( argc < 2 )
+    {
+        std::ucerr << _U("Usage: ") << argv[0] << _U(" <pgnfile>") << std::endl;
+        return EXIT_FAILURE;
+    }
+
+#if 0
+    boost::intrusive_ptr<pgn::IParser> pgnparser;
+    pgnparser = pgn::IParser::create(argv[1]);
+
+    if ( pgnparser == NULL )
+    {
+        std::ucerr << _U("Critical error: can't open ") << argv[1] <<
+            _U(" file") << std::endl;
+        return EXIT_FAILURE;
+    }
+#endif
+
     return EXIT_SUCCESS;
 }
 
