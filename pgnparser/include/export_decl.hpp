@@ -17,18 +17,18 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PGN_EXPORT_DECL_HPP
-#define PGN_EXPORT_DECL_HPP
+#ifndef PGN_LIB_EXPORT_DECL_HPP
+#define PGN_LIB_EXPORT_DECL_HPP
 
 #if defined(_WIN32)
-#ifdef PGN_PARSER_API_EXPORT
-#    define PGN_PARSER_API __declspec(dllexport)
+#ifdef PGN_LIB_API_EXPORT
+#    define PGN_LIB_API __declspec(dllexport)
 #else
-#    define PGN_PARSER_API __declspec(dllimport)
+#    define PGN_LIB_API __declspec(dllimport)
 #endif
 #else
-#    define PGN_PARSER_API
+#    define PGN_LIB_API
 #endif
 
-#endif /* #ifndef PGN_EXPORT_DECL_HPP */
+#endif /* #ifndef PGN_LIB_EXPORT_DECL_HPP */
 

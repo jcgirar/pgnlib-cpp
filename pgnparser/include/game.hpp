@@ -17,8 +17,8 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PGN_GAME_HPP
-#define PGN_GAME_HPP
+#ifndef PGN_LIB_GAME_HPP
+#define PGN_LIB_GAME_HPP
 
 #include "common_decl.hpp"
 
@@ -74,7 +74,7 @@ extern const tag_pair_t NULL_TAG_PAIR;
  * and semantics is permitted and encouraged when needed, the STR is
  * the common ground that all programs should follow for public data
  * interchange. */
-class PGN_PARSER_API IGame
+class PGN_LIB_API IGame
 {
 public:
     /**
@@ -230,5 +230,5 @@ protected:
 
 } /* namespace pgn */
 
-#endif /* #ifndef PGN_GAME_HPP */
+#endif /* #ifndef PGN_LIB_GAME_HPP */
 

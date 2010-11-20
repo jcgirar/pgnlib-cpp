@@ -17,8 +17,8 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PGN_MOVE_HPP
-#define PGN_MOVE_HPP
+#ifndef PGN_LIB_MOVE_HPP
+#define PGN_LIB_MOVE_HPP
 
 #include "common_decl.hpp"
 
@@ -319,16 +319,16 @@ typedef enum
     nagLastNumericAnnotationGlyph
 } NAG_t; /* }}} */
 
-/** Different formats of NAG representation. */
+/** Different formats of NAG representation: {{{ */
 typedef enum
 {
     nfNumeric,  /**< $1, $2 and so on. */
     nfBrief,    /**< ?, !!, and so on. In case brief description is absent
                      nfDetailed is used. */
     nfDetailed  /**< Detailed description for given NAG. */
-} NAG_format_t;
+} NAG_format_t; /* }}} */
 
-class PGN_PARSER_API IMove
+class PGN_LIB_API IMove
 {
 public:
     /**
@@ -377,5 +377,5 @@ protected:
 
 } /* namespace pgn */
 
-#endif /* #ifndef PGN_MOVE_HPP */
+#endif /* #ifndef PGN_LIB_MOVE_HPP */
 

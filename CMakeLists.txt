@@ -18,11 +18,11 @@
 ###############################################################################
 
 cmake_minimum_required(VERSION 2.8)
-project(PGN_PARSER)
+project(PGN_LIB)
 
-set(PGN_PARSER_VERSION_MAJOR 0)
-set(PGN_PARSER_VERSION_MINOR 1)
-set(PGN_PARSER_VERSION_PATCH 0)
+set(PGN_LIB_VERSION_MAJOR 0)
+set(PGN_LIB_VERSION_MINOR 1)
+set(PGN_LIB_VERSION_PATCH 0)
 
 set(CMAKE_INCLUDE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/include)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
@@ -36,9 +36,9 @@ set(Boost_logging_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/3rd_parties/logging)
 set(Boost_INCLUDE_DIRS "${Boost_INCLUDE_DIRS} ${Boost_logging_INCLUDE_DIRS}")
 
 # Build PGN parser library
-add_subdirectory(library)
+add_subdirectory(pgnparser)
 
-# Common definitions for any executable which will be linked with PGN parser
+# Common definitions for any executable which will be linked with PGN library
 include_directories(${CMAKE_INCLUDE_OUTPUT_DIRECTORY})
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 

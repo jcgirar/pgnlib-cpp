@@ -17,15 +17,15 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PGN_REF_OBJECT_HPP
-#define PGN_REF_OBJECT_HPP
+#ifndef PGN_LIB_REF_OBJECT_HPP
+#define PGN_LIB_REF_OBJECT_HPP
 
 #include "export_decl.hpp"
 
 namespace pgn
 {
 
-class PGN_PARSER_API IRefObject
+class PGN_LIB_API IRefObject
 {
 public:
     virtual unsigned addRef() = 0;
@@ -37,5 +37,5 @@ protected:
 
 } /* namespace pgn */
 
-#endif /* #ifndef PGN_REF_OBJECT_HPP */
+#endif /* #ifndef PGN_LIB_REF_OBJECT_HPP */
 

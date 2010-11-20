@@ -17,8 +17,8 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PGN_PARSER_HPP
-#define PGN_PARSER_HPP
+#ifndef PGN_LIB_PARSER_HPP
+#define PGN_LIB_PARSER_HPP
 
 #include "ref_object.hpp"
 #include "common_decl.hpp"
@@ -29,7 +29,7 @@ namespace pgn
 /**
  * Get notification about syntax errors in pgn-file. User can implement the
  * interface and register it using IParser::setErrorHandler(...) method. */
-class PGN_PARSER_API IErrorHandlerCallback : public IRefObject
+class PGN_LIB_API IErrorHandlerCallback : public IRefObject
 {
 public:
     /** 
@@ -73,7 +73,7 @@ public:
  *     }
  * }
  * @endcode */
-class PGN_PARSER_API IParser : public IRefObject
+class PGN_LIB_API IParser : public IRefObject
 {
 public:
     /**
@@ -164,5 +164,5 @@ public:
 
 } /* namespace pgn */
 
-#endif /* #ifndef PGN_PARSER_HPP */
+#endif /* #ifndef PGN_LIB_PARSER_HPP */
 

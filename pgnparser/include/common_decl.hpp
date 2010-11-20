@@ -17,8 +17,8 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PGN_COMMON_DECL_HPP
-#define PGN_COMMON_DECL_HPP
+#ifndef PGN_LIB_COMMON_DECL_HPP
+#define PGN_LIB_COMMON_DECL_HPP
 
 #include "export_decl.hpp"
 
@@ -52,5 +52,5 @@ class IParser;                                  /**< forward declaration */
 
 } /* namespace pgn */
 
-#endif /* #ifndef PGN_COMMON_DECL_HPP */
+#endif /* #ifndef PGN_LIB_COMMON_DECL_HPP */
 
