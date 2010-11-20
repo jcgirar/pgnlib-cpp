@@ -1,2 +1,0 @@
-For PGN import format, there may be zero or more white space characters between any adjacent pair of tokens in a tag pair.
-PGN import format may have multiple tag pairs on the same line and may even have a tag pair spanning more than a single line.
