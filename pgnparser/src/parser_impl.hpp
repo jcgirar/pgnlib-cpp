@@ -32,6 +32,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 namespace pgn
 {
@@ -109,6 +110,40 @@ private:
 
     boost::mutex m_glbSyncPoint;
     boost::intrusive_ptr<IErrorHandlerCallback> m_callback;
+};
+
+namespace qi = boost::spirit::qi;
+
+/* The grammar is used for light weight parsing of PGN file. */
+class LightWeightSkipper : public qi::grammar<char const*>
+{
+public:
+    typedef qi::rule<char const*> RuleType;
+
+    RuleType entryPoint; /* entry point into the grammar */
+    LightWeightSkipper() : LightWeightSkipper::base_type(entryPoint)
+    {
+        initialize();
+    }
+
+protected:
+    void initialize();
+};
+
+/* The grammar is used for light weight parsing of PGN file. */
+class LightWeightGrammar : qi::grammar<char const*, LightWeightSkipper>
+{
+public:
+    typedef qi::rule<char const*, LightWeightSkipper> RuleType;
+
+    RuleType entryPoint; /* entry point into the grammar */
+    LightWeightGrammar() : LightWeightGrammar::base_type(entryPoint)
+    {
+        initialize();
+    }
+
+protected:
+    void initialize();
 };
 
 class Parser : public RefObject<IParser>
