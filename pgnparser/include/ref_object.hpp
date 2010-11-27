@@ -35,6 +35,16 @@ protected:
     virtual ~IRefObject() {}
 };
 
+void intrusive_ptr_add_ref(IRefObject* object)
+{
+    object->addRef();
+}
+
+void intrusive_ptr_release(IRefObject* object)
+{
+    object->release();
+}
+
 } /* namespace pgn */
 
 #endif /* #ifndef PGN_LIB_REF_OBJECT_HPP */

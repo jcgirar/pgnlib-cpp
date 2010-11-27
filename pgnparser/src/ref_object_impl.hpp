@@ -26,16 +26,6 @@
 namespace pgn
 {
 
-void intrusive_ptr_add_ref(IRefObject* obj)
-{
-    obj->addRef();
-}
-
-void intrusive_ptr_release(IRefObject* obj)
-{
-    obj->release();
-}
-
 template <typename T>
 class RefObject : public T
 {
@@ -50,14 +40,20 @@ public:
 
     unsigned release()
     {
-        boost::mutex::scoped_lock lock(m_mutex);
-        if ( --m_counter == 0 )
+        if ( _release() == 0 )
         {
             delete this;
             return 0;
         }
 
         return m_counter;
+    }
+
+protected:
+    unsigned _release()
+    {
+        boost::mutex::scoped_lock lock(m_mutex);
+        return --m_counter;
     }
 
 private:

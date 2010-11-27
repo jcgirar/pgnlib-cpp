@@ -19,6 +19,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 project(PGN_LIB)
+set(CMAKE_BUILD_TYPE debug)
 
 set(PGN_LIB_VERSION_MAJOR 0)
 set(PGN_LIB_VERSION_MINOR 1)
@@ -31,7 +32,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 # Find and extend boost library. At the present moment there is no logging
 # library inside boost. Thus I included a version which probably will be
 # accepted soon.
-find_package(Boost 1.44 COMPONENTS thread REQUIRED)
+find_package(Boost 1.44 COMPONENTS thread iostreams REQUIRED)
 set(Boost_logging_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/3rd_parties/logging)
 set(Boost_INCLUDE_DIRS "${Boost_INCLUDE_DIRS} ${Boost_logging_INCLUDE_DIRS}")
 

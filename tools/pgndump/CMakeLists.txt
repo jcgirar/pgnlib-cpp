@@ -19,5 +19,6 @@
 
 include_directories(${Boost_INCLUDE_DIRS})
 add_executable(pgndump main.cpp)
-target_link_libraries(pgndump ${PGN_PARSER_LIBRARIES})
+#target_link_libraries(pgndump ${PGN_PARSER_LIBRARIES})
+target_link_libraries(pgndump pgnparser)
 

@@ -114,7 +114,8 @@ private:
 
 namespace qi = boost::spirit::qi;
 
-/* The grammar is used for light weight parsing of PGN file. */
+/* The grammar is used for light weight parsing of PGN file. Here we should
+ * skip comments, escape (%), spaces. */
 class LightWeightSkipper : public qi::grammar<char const*>
 {
 public:
@@ -128,10 +129,14 @@ public:
 
 protected:
     void initialize();
+
+private:
+    RuleType m_comment;
+    RuleType m_ignoredLine;
 };
 
 /* The grammar is used for light weight parsing of PGN file. */
-class LightWeightGrammar : qi::grammar<char const*, LightWeightSkipper>
+class LightWeightGrammar : public qi::grammar<char const*, LightWeightSkipper>
 {
 public:
     typedef qi::rule<char const*, LightWeightSkipper> RuleType;
@@ -144,6 +149,47 @@ public:
 
 protected:
     void initialize();
+
+private:
+    RuleType m_tagName;
+    RuleType m_tagValue;
+    RuleType m_tagPair;
+    RuleType m_tagPairSection;
+};
+
+class MappedFile
+{
+public:
+    typedef boost::iostreams::mapped_file_source::size_type size_type;
+    static const size_type DEFAULT_MAPPED_SIZE = 2 * 1024 * 1024; /* 2 Mb */
+
+    MappedFile() : m_offset() {}
+
+    void open(std::string const& path, boost::intmax_t offset = 0,
+        size_type length = DEFAULT_MAPPED_SIZE)
+    {
+        m_shift  = offset % m_mappedFileImpl.alignment();
+        m_offset = offset - m_shift;
+        m_mappedFileImpl.open(path, length + m_shift, m_offset);
+    }
+
+    void open(std::wstring const& path, boost::intmax_t offset = 0,
+        size_type length = DEFAULT_MAPPED_SIZE)
+    {
+        m_shift  = offset % m_mappedFileImpl.alignment();
+        m_offset = offset - m_shift;
+    }
+
+    void close() { m_mappedFileImpl.close(); }
+    bool isOpen() const { return m_mappedFileImpl.is_open(); }
+    char const* getData() const { return m_mappedFileImpl.data() + m_shift; }
+    size_type getMappedSize() const { return m_mappedFileImpl.size(); }
+
+    boost::intmax_t getOffsetInFile() const { return m_offset; }
+private:
+    unsigned m_shift;
+    boost::intmax_t m_offset;
+    boost::iostreams::mapped_file_source m_mappedFileImpl;
 };
 
 class Parser : public RefObject<IParser>
@@ -192,8 +238,6 @@ protected:
 
 private:
     bool m_isStrict; /* is the parser strict (report about each error) */
-    mutable boost::shared_mutex m_gameInFileCacheLock;
-    bool m_isLightweightParsingDone; /* the PGN file was parsed till eof */
     unsigned m_gameCount; /* number of games in the PGN file */
 
     typedef enum
@@ -214,6 +258,10 @@ private:
         unsigned long long offset[goGameOffsetCount];
         unsigned size; /* size of the game in bytes */
     };
+
+    mutable boost::shared_mutex m_gameInFileCacheLock;
+    MappedFile m_mappedFile; /* it is used for light weight parsing */
+    bool m_isLightweightParsingDone; /* the PGN file was parsed till eof */
 
     std::vector<GameInFile> m_gameInFileCache;
     ErrorHandler m_errorHandler;

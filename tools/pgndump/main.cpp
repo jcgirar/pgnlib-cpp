@@ -39,7 +39,6 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-#if 0
     boost::intrusive_ptr<pgn::IParser> pgnparser;
     pgnparser = pgn::IParser::create(argv[1]);
 
@@ -49,7 +48,6 @@ int main(int argc, char* argv[])
             _U(" file") << std::endl;
         return EXIT_FAILURE;
     }
-#endif
 
     return EXIT_SUCCESS;
 }

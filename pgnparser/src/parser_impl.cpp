@@ -21,6 +21,7 @@
 #warning "TODO: replace game.hpp on game_impl.hpp"
 #include "parser_impl.hpp"
 
+#include <string>
 #include <cstdlib>
 
 namespace pgn
@@ -38,19 +39,22 @@ void LightWeightSkipper::initialize()
     /* There is a special escape mechanism for PGN data. This mechanism is
      * triggered by a percent sign character ("%") appearing in the first
      * column of a line; the data on the rest of the line is ignored. */
-    RuleType ignoredLine = (qi::eol >> char_('%') >> *(char_ - qi::eol));
+    m_ignoredLine = (qi::eol >> char_('%') >> *(char_ - qi::eol));
+    m_ignoredLine.name("ignored line");
 
     /* There are two kinds of comments. The first comment type starts with
      * a semicolon character and continues to the end of the line. The
      * second kind starts with a left brace character and continues to the next
      * right brace character. Comments cannot appear inside any token. Comments
      * do not nest. */
-    RuleType comment = (
+    m_comment = (
         (char_(';') >> *(char_ - qi::eol)) |
         (char_('{') >> *(char_ - char_('}')) >> char_('}'))
     );
+    m_comment.name("comment");
 
-    entryPoint = +(ignoredLine | comment | qi::iso8859_1::space);
+    entryPoint = m_ignoredLine | m_comment | qi::iso8859_1::space;
+    entryPoint.name("light-weight skipper");
 }
 
 void LightWeightGrammar::initialize()
@@ -59,7 +63,8 @@ void LightWeightGrammar::initialize()
 
     /* Tag names is that they are composed exclusively of letters, digits, and
      * the underscore character. */
-    RuleType tagName = +(qi::iso8859_1::alnum | char_('_'));
+    m_tagName = +(qi::iso8859_1::alnum | char_('_'));
+    m_tagName.name("tag name");
 
     /* Tag value is a string token. The string token is a sequence of zero or
      * more printing characters delimited by a pair of quote characters. An
@@ -68,34 +73,44 @@ void LightWeightGrammar::initialize()
      * A backslash inside a string is represented by two adjacent backslashes.
      * Non-printing characters like newline and tab are not permitted inside
      * of strings. A string token is terminated by its closing quote. */
-    RuleType tagValue = (
+    m_tagValue = (
         char_('"') >>
-        *(
-            char_("\\\\") | char_("\\\"") |
+        *qi::no_skip[
+            char_('\\') >> char_('\\') |
+            char_('\\') >> char_('"')  | /* why does char_("\\\"") not work? */
             qi::iso8859_1::graph - char_('"') |
             char_(' ')
-        ) >> 
+        ] >> 
         char_('"')
     );
+    m_tagValue.name("tag value");
 
     /* A tag pair is composed of four consecutive tokens: a left bracket token,
      * a symbol token, a string token, and a right bracket token. */
-    RuleType tagPair = (char_('[') >> tagName >> tagValue >> char_(']'));
+    m_tagPair = (
+        char_('[') >> m_tagName >> m_tagValue >> char_(']')
+    );
+    m_tagPair.name("tag pair");
 
     /* The tag pair section is composed of a series of zero or more tag
      * pairs. */
-    RuleType tagPairSection = *tagPair;
+    m_tagPairSection = +m_tagPair;
+    m_tagPairSection.name("tag pair section");
 
     /* A PGN database file is a sequential collection of zero or more PGN
      * games. An empty file is a valid. A PGN game is composed of two sections.
      * The first is the tag pair section and the second is the movetext
      * section. */
-    entryPoint = tagPairSection >> *(char_ >> !tagPair);
+    entryPoint = m_tagPairSection >> *(char_ >> !m_tagPair);
+    entryPoint.name("light-weight grammar");
+    qi::debug(entryPoint);
 }
 
 template <typename T> void Parser::initialize(T const* pgnfile, bool isStrict)
 {
     m_isStrict = isStrict;
+    m_mappedFile.open(std::basic_string<T>(pgnfile), 0, 10000);
+    doLightWeightParsing(1000);
 }
 
 /* The method will parse till gameN game and more (by performance reason). */
@@ -110,7 +125,11 @@ void Parser::doLightWeightParsing(unsigned gameN)
     bool isLightWeightParsingDone = false;
 
     /* TODO: Get position after last parsing game */
+    char const* beginIt = m_mappedFile.getData();
+    char const* endIt = beginIt + m_mappedFile.getMappedSize();
 
+    bool isOk = qi::phrase_parse(beginIt, endIt, LightWeightGrammar(),
+        LightWeightSkipper());
 
     m_isLightweightParsingDone = isLightWeightParsingDone;
 }
