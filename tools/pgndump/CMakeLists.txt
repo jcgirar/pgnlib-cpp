@@ -18,6 +18,6 @@
 ###############################################################################
 
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${PROJECT_SOURCE_DIR}/pgnparser/include)
+include_directories(${PROJECT_SOURCE_DIR}/parser/include)
 add_executable(pgndump main.cpp)
 target_link_libraries(pgndump pgnparser)

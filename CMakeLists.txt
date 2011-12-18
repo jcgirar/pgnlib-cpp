@@ -34,7 +34,7 @@ find_package(Boost COMPONENTS thread iostreams REQUIRED)
 add_subdirectory(3rd_parties)
 
 # Build PGN parser library
-add_subdirectory(pgnparser)
+add_subdirectory(parser)
 
 # Build additional tools
 add_subdirectory(tools)
