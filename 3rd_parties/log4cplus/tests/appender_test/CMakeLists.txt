@@ -13,3 +13,5 @@ message (STATUS "${test_name} sources: ${test_sources}")
 include_directories ("${CMAKE_SOURCE_DIR}/include")
 add_executable (${test_name} ${test_sources})
 target_link_libraries (${test_name} log4cplus)
+
+add_test (${test_name} ${test_name})

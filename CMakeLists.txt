@@ -1,7 +1,7 @@
 ###############################################################################
-# Copyright (C) 2010 Nikita Manovich <nikita.manovich@gmail.com>
+# Copyright (C) 2010-2012 Nikita Manovich <nikita.manovich@gmail.com>
 # 
-# This file is part of C++ PGN parser, http://code.google.com/p/pgnparser-cpp
+# This file is part of C++ PGN parser, http://code.google.com/p/pgnlib-cpp
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published
@@ -17,7 +17,7 @@
 # along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 project(PGN_LIB)
 set(CMAKE_BUILD_TYPE debug)
 
@@ -25,27 +25,19 @@ set(PGN_LIB_VERSION_MAJOR 0)
 set(PGN_LIB_VERSION_MINOR 1)
 set(PGN_LIB_VERSION_PATCH 0)
 
-set(CMAKE_INCLUDE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/include)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-
 # Find and extend boost library. At the present moment there is no logging
 # library inside boost. Thus I included a version which probably will be
 # accepted soon.
-find_package(Boost 1.44 COMPONENTS thread iostreams REQUIRED)
-set(Boost_logging_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/3rd_parties/logging)
-set(Boost_INCLUDE_DIRS "${Boost_INCLUDE_DIRS} ${Boost_logging_INCLUDE_DIRS}")
+find_package(Boost COMPONENTS thread iostreams REQUIRED)
+
+# Build necessary 3-rd party software
+add_subdirectory(3rd_parties)
 
 # Build PGN parser library
 add_subdirectory(pgnparser)
-
-# Common definitions for any executable which will be linked with PGN library
-include_directories(${CMAKE_INCLUDE_OUTPUT_DIRECTORY})
-link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 # Build additional tools
 add_subdirectory(tools)
 
 # Build tests for PGN library
-# add_subdirectory(tests)
-
+add_subdirectory(tests)

@@ -103,9 +103,63 @@ set (log4cplus_sources
 if ("${UNIX}" OR "${CYGWIN}")
   set (log4cplus_sources ${log4cplus_sources}
     src/socket-unix.cxx)
-  set (log4cplus_headers ${log4cplus_headers}
-    include/log4cplus/config/defines.hxx
-    include/log4cplus/helpers/syncprims-pthreads.h)
+  
+  file(READ include/log4cplus/config/defines.hxx.in FILE_BUFFER)
+  string(REPLACE "#undef" "#cmakedefine" FILE_BUFFER "${FILE_BUFFER}")
+  set(DEFINES_HXX_CMAKE ${PROJECT_BINARY_DIR}/include/log4cplus/config/defines.hxx.cmake) 
+  file(WRITE ${DEFINES_HXX_CMAKE} ${FILE_BUFFER})
+ 
+  include(CheckIncludeFiles)
+  check_include_files(syslog.h LOG4CPLUS_HAVE_SYSLOG_H)
+  check_include_files(netinet/in.h LOG4CPLUS_HAVE_NETINET_IN_H)
+  check_include_files(sys/types.h LOG4CPLUS_HAVE_SYS_TYPES_H)
+  check_include_files(sys/socket.h LOG4CPLUS_HAVE_SYS_SOCKET_H)
+  check_include_files(sys/stat.h LOG4CPLUS_HAVE_SYS_STAT_H)
+  check_include_files(sys/timeb.h LOG4CPLUS_HAVE_SYS_TIMEB_H)
+  check_include_files(sys/time.h LOG4CPLUS_HAVE_SYS_TIME_H)
+  check_include_files(time.h LOG4CPLUS_HAVE_TIME_H)
+  check_include_files(netdb.h LOG4CPLUS_HAVE_NETDB_H)
+  check_include_files(unistd.h LOG4CPLUS_HAVE_UNISTD_H)
+  check_include_files(errno.h LOG4CPLUS_HAVE_ERRNO_H)
+  check_include_files(stdarg.h LOG4CPLUS_HAVE_STDARG_H)
+  check_include_files(stdio.h LOG4CPLUS_HAVE_STDIO_H)
+  check_include_files(wchar.h LOG4CPLUS_HAVE_WCHAR_H)
+  
+  include(CheckFunctionExists)
+  check_function_exists(ftime LOG4CPLUS_HAVE_FTIME)
+  check_function_exists(getaddrinfo LOG4CPLUS_HAVE_GETADDRINFO)
+  check_function_exists(gethostbyname_r LOG4CPLUS_HAVE_GETHOSTBYNAME_R)
+  check_function_exists(getpid LOG4CPLUS_HAVE_GETPID)
+  check_function_exists(gettimeofday LOG4CPLUS_HAVE_GETTIMEOFDAY)
+  check_function_exists(gmtime_r LOG4CPLUS_HAVE_GMTIME_R)
+  check_function_exists(htonl LOG4CPLUS_HAVE_HTONL)
+  check_function_exists(htons LOG4CPLUS_HAVE_HTONS)
+  check_function_exists(localtime_r LOG4CPLUS_HAVE_LOCALTIME_R)
+  check_function_exists(lstat LOG4CPLUS_HAVE_LSTAT)
+  check_function_exists(ntohl LOG4CPLUS_HAVE_NTOHL)
+  check_function_exists(ntohs LOG4CPLUS_HAVE_NTOHS)
+  check_function_exists(stat LOG4CPLUS_HAVE_STAT)
+ 
+  #undef LOG4CPLUS_SINGLE_THREADED
+  #undef LOG4CPLUS_USE_PTHREADS
+  #undef LOG4CPLUS_WORKING_LOCALE
+  #undef socklen_t
+
+  if(CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+      set(LOG4CPLUS_DEBUGGING 1)
+  endif()
+
+  set(LOG4CPLUS_DECLSPEC_EXPORT " ")
+  set(LOG4CPLUS_DECLSPEC_IMPORT " ")
+
+  check_function_exists(__sync_add_and_fetch LOG4CPLUS_HAVE___SYNC_ADD_AND_FETCH)
+  check_function_exists(__sync_sub_and_fetch LOG4CPLUS_HAVE___SYNC_SUB_AND_FETCH)
+  check_function_exists(clock_gettime LOG4CPLUS_HAVE_CLOCK_GETTIME)
+
+  set(DEFINES_HXX ${PROJECT_BINARY_DIR}/include/log4cplus/config/defines.hxx) 
+  configure_file(${DEFINES_HXX_CMAKE} ${DEFINES_HXX})
+  include_directories(${PROJECT_BINARY_DIR}/include)
+ 
 elseif (WIN32)
   set (log4cplus_sources ${log4cplus_sources}
     src/socket-win32.cxx
@@ -147,4 +201,6 @@ if (WIN32)
 endif ()
 
 add_subdirectory (loggingserver)
+
+enable_testing()
 add_subdirectory (tests)
