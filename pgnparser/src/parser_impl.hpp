@@ -20,7 +20,7 @@
 #ifndef PGN_PARSER_IMPL_HPP
 #define PGN_PARSER_IMPL_HPP
 
-#include "parser.hpp"
+#include <pgn/parser.hpp>
 #include "ref_object_impl.hpp"
 
 #include <set>

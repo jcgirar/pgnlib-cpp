@@ -328,6 +328,12 @@ typedef enum
     nfDetailed  /**< Detailed description for given NAG. */
 } NAG_format_t; /* }}} */
 
+/**
+ * The class represents a chess move. By performance reason it isn't a
+ * reference counting object and memory has to be owned by a factory class.
+ * Usually game contains less than 1000 moves and it should not be a memory
+ * bottleneck.
+ */
 class PGN_LIB_API IMove
 {
 public:

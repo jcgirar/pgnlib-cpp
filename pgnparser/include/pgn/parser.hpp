@@ -61,15 +61,18 @@ public:
  * {
  *     pgnparser->setErrorHandler(...);
  *
- *     IGame const* game;
- *     while ( (game = pgnparser->readGame()) != NULL )
+ *     pgn::IGame const* game; // it is possible to use boost::intrusive_ptr
+ *     while ((game = pgnparser->readGame()) != NULL)
  *     {
- *         if ( pgn::IParser::isGameValid(game) != pgn::seValid )
+ *         if (pgn::IParser::isGameValid(game) != pgn::seValid)
  *         {
+ *             game->release();
  *             break;
  *         }
  *
  *         ...
+ *
+ *         game->release();
  *     }
  * }
  * @endcode */
@@ -139,22 +142,18 @@ public:
     virtual unsigned getGameCount() const = 0;
 
     /**
-     * Read N-th game from pgnfile. There is no method which can return number
-     * of games due to performance reason. The method will parse the file on
-     * demand.
+     * Read N-th game from pgnfile. The method will parse the file on demand.
      *
      * @param [in] gameN    number of game (from 1 to N). If the parameter is
-     *                      NEXT_ITEM then to read next game. For first call of
-     *                      the method it means to read first game. For second
-     *                      call of the method it means to read second game and
-     *                      so on. If user has called readGame(N) (with
-     *                      parameter) then next call without a parameter will
-     *                      be equal to readGame(N+1).
+     * NEXT_ITEM then to read next game. For first call of the method it means
+     * to read first game. For second call of the method it means to read second
+     * game and so on. If user has called readGame(N) (with parameter) then next
+     * call without a parameter will be equal to readGame(N+1).
      *
      * @return On success the method returns an instance of IGame which
      * represents gameN. If there is no game with given number the method
-     * returns NULL. Returned object is valid till next call of the method
-     * in the same thread. It means that IParser is owner of the object.
+     * returns NULL. Inside the class maintains pool of games and will not
+     * create a new IGame object in case there are unused objects.
      *
      * Note: On syntax error IErrorHandlerCallback is called and
      * dummy instance of IGame is returned. Use isGameValid() method for

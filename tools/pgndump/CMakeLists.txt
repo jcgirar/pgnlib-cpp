@@ -1,7 +1,7 @@
 ###############################################################################
-# Copyright (C) 2010 Nikita Manovich <nikita.manovich@gmail.com>
+# Copyright (C) 2010-2012 Nikita Manovich <nikita.manovich@gmail.com>
 # 
-# This file is part of C++ PGN parser, http://code.google.com/p/pgnparser-cpp
+# This file is part of C++ PGN parser, http://code.google.com/p/pgnlib-cpp
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published
@@ -18,7 +18,6 @@
 ###############################################################################
 
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR}/pgnparser/include)
 add_executable(pgndump main.cpp)
-#target_link_libraries(pgndump ${PGN_PARSER_LIBRARIES})
 target_link_libraries(pgndump pgnparser)
-

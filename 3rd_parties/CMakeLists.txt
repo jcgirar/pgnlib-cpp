@@ -17,12 +17,4 @@
 # along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-set(PGN_PARSER_library_name pgnparser)
-
-include_directories(include)
-include_directories(${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
-
-file(GLOB SOURCES src/*.cpp)
-add_library(${PGN_PARSER_library_name} SHARED ${SOURCES})
-target_link_libraries(${PGN_PARSER_library_name} ${Boost_LIBRARIES})
+add_subdirectory(log4cplus)

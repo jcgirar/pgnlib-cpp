@@ -20,8 +20,10 @@
 #ifndef PGN_REF_OBJECT_IMPL_HPP
 #define PGN_REF_OBJECT_IMPL_HPP
 
-#include "ref_object.hpp"
+#include <pgn/ref_object.hpp>
+#ifndef PGN_LIB_SINGLE_THREAD
 #include <boost/thread/mutex.hpp>
+#endif
 
 namespace pgn
 {
@@ -34,7 +36,9 @@ public:
 
     unsigned addRef()
     {
+#ifndef PGN_LIB_SINGLE_THREAD
         boost::mutex::scoped_lock lock(m_mutex);
+#endif
         return ++m_counter;
     }
 
@@ -52,13 +56,17 @@ public:
 protected:
     unsigned _release()
     {
+#ifndef PGN_LIB_SINGLE_THREAD
         boost::mutex::scoped_lock lock(m_mutex);
+#endif
         return --m_counter;
     }
 
 private:
     unsigned m_counter;
+#ifndef PGN_LIB_SINGLE_THREAD
     boost::mutex m_mutex;
+#endif
 };
 
 } /* namespace pgn */

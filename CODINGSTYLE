@@ -1,8 +1,8 @@
 This document tries to give an overview of the codingstyle used in PGN library.
 To keep the code consistent every commit should apply to this codingstyle.
 
-The codingstyle of PGN library is in no way perfect and is in parts not even
-the preferred codingstyle of the maintainers. But consistency is more important
+The coding style of PGN library is in no way perfect and is in parts not even
+the preferred coding style of the maintainers. But consistency is more important
 than personal preferences and most parts of the style can be applied through
 simple editor settings.
 
@@ -30,7 +30,7 @@ simple editor settings.
 
     Example:
 
-    if ( true ) 
+    if (true) 
     {
         // do something
     }

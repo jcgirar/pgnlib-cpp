@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010 Nikita Manovich <nikita.manovich@gmail.com>
+ * Copyright (C) 2010-2012 Nikita Manovich <nikita.manovich@gmail.com>
  * 
  * This file is part of C++ PGN parser, http://code.google.com/p/pgnparser-cpp
  *
@@ -33,7 +33,7 @@ int wmain(int argc, wchar_t* argv[])
 int main(int argc, char* argv[])
 #endif
 {
-    if ( argc < 2 )
+    if (argc < 2)
     {
         std::ucerr << _U("Usage: ") << argv[0] << _U(" <pgnfile>") << std::endl;
         return EXIT_FAILURE;
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     boost::intrusive_ptr<pgn::IParser> pgnparser;
     pgnparser = pgn::IParser::create(argv[1]);
 
-    if ( pgnparser == NULL )
+    if (pgnparser == NULL)
     {
         std::ucerr << _U("Critical error: can't open ") << argv[1] <<
             _U(" file") << std::endl;
@@ -51,4 +51,3 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
-

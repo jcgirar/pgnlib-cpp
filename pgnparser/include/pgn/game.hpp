@@ -20,7 +20,8 @@
 #ifndef PGN_LIB_GAME_HPP
 #define PGN_LIB_GAME_HPP
 
-#include "common_decl.hpp"
+#include <pgn/ref_object.hpp>
+#include <pgn/common_decl.hpp>
 
 namespace pgn
 {
@@ -74,7 +75,7 @@ extern const tag_pair_t NULL_TAG_PAIR;
  * and semantics is permitted and encouraged when needed, the STR is
  * the common ground that all programs should follow for public data
  * interchange. */
-class PGN_LIB_API IGame
+class PGN_LIB_API IGame : public IRefObject
 {
 public:
     /**
@@ -219,13 +220,10 @@ public:
      * @param [in] move     move which was get from getMove method.
      * @param [in] n        number of variation for given move from 1 till
      *                      N where N is number of variations.
-     * @return On success it returns an idetifier of a variant. Otherwise
+     * @return On success it returns an identifier of a variant. Otherwise
      * NULL_VARIATION is returned. */
     virtual variation_t getVariation(IMove const* move,
         unsigned n = NEXT_ITEM) const = 0;
-
-protected:
-    virtual ~IGame() {}
 };
 
 } /* namespace pgn */

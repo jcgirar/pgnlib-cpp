@@ -17,7 +17,7 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game.hpp"
+#include <pgn/game.hpp>
 #warning "TODO: replace game.hpp on game_impl.hpp"
 #include "parser_impl.hpp"
 
